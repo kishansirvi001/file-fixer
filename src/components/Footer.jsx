@@ -20,10 +20,10 @@ function Footer() {
       });
 
       if (res.ok) {
-        alert("Thanks! Email sent to your personal inbox.");
-        setEmail(""); // clear input
+        alert("Thanks! Email sent to your inbox.");
+        setEmail("");
       } else {
-        alert("Failed to send email. Try again.");
+        alert("Failed to send email. Check server logs.");
       }
     } catch (err) {
       console.error(err);
@@ -37,9 +37,7 @@ function Footer() {
         {/* BRAND */}
         <div>
           <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">🚀 FileFixer</h2>
-          <p className="text-sm mb-4">
-            Fast, secure & free PDF tools — compress, convert, merge and more.
-          </p>
+          <p className="text-sm mb-4">Fast, secure & free PDF tools — compress, convert, merge and more.</p>
           <div className="text-xs text-gray-400 space-y-1 mb-4">
             <p>🔒 100% Secure</p>
             <p>📁 No File Storage</p>
@@ -53,7 +51,7 @@ function Footer() {
           </div>
         </div>
 
-        {/* PDF TOOLS */}
+        {/* PDF Tools */}
         <div>
           <h3 className="text-lg font-semibold text-white mb-4">PDF Tools</h3>
           <ul className="space-y-2 text-sm">
@@ -64,7 +62,7 @@ function Footer() {
           </ul>
         </div>
 
-        {/* CONVERT TOOLS */}
+        {/* Convert Tools */}
         <div>
           <h3 className="text-lg font-semibold text-white mb-4">Convert Tools</h3>
           <ul className="space-y-2 text-sm">
@@ -75,7 +73,7 @@ function Footer() {
           </ul>
         </div>
 
-        {/* NEWSLETTER */}
+        {/* Newsletter */}
         <div>
           <h3 className="text-lg font-semibold text-white mb-4">Stay Updated</h3>
           <p className="text-sm mb-4">Get updates on new tools 🚀</p>
@@ -87,22 +85,17 @@ function Footer() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 text-black focus:outline-none"
             />
-            <button onClick={handleJoin} className="bg-indigo-600 px-4 text-white hover:bg-indigo-700 transition">
-              Join
-            </button>
+            <button onClick={handleJoin} className="bg-indigo-600 px-4 text-white hover:bg-indigo-700 transition">Join</button>
           </div>
         </div>
       </div>
 
-      {/* BACK TO TOP */}
-      <button
-        onClick={scrollToTop}
-        className="absolute right-6 bottom-16 bg-indigo-600 p-3 rounded-full text-white shadow-lg hover:bg-indigo-700 transition"
-      >
+      {/* Back to Top */}
+      <button onClick={scrollToTop} className="absolute right-6 bottom-16 bg-indigo-600 p-3 rounded-full text-white shadow-lg hover:bg-indigo-700 transition">
         <FaArrowUp />
       </button>
 
-      {/* BOTTOM */}
+      {/* Bottom */}
       <div className="border-t border-gray-700 mt-10 pt-6 text-center text-sm text-gray-400">
         © {new Date().getFullYear()} FileFixer • All rights reserved
       </div>

@@ -6,25 +6,26 @@ export default async function handler(req, res) {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
 
+  // Gmail transporter
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASS, // Gmail App Password
+      user: process.env.GMAIL_USER,       // your Gmail
+      pass: process.env.GMAIL_APP_PASS,   // Gmail App Password
     },
   });
 
   try {
     await transporter.sendMail({
       from: `"FileFixer" <${process.env.GMAIL_USER}>`,
-      to: process.env.MY_EMAIL,
+      to: process.env.MY_EMAIL,            // where you want to receive emails
       subject: "New subscription",
       text: `New user subscribed with email: ${email}`,
     });
 
     res.status(200).json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error("Error sending email:", err);
     res.status(500).json({ error: "Failed to send email" });
   }
 }
