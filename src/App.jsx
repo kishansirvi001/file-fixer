@@ -19,10 +19,15 @@ import ZipToPdf from "./pages/tools/ZipToPdf";
 import ProtectPdf from "./pages/tools/ProtectPdf";
 import UnlockPdf from "./pages/tools/UnlockPdf";
 import ScanToPdf from "./pages/tools/ScanToPdf";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <BrowserRouter>
+
+      {/* ✅ FIX: place here */}
+      <ScrollToTop />
+
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
 
@@ -36,21 +41,19 @@ function App() {
             <Route path="/compress-pdf" element={<PdfCompressor />} />
             <Route path="/image-to-text" element={<ImageToText />} />
             <Route path="/pdf-to-text" element={<PdfToText />} />
-            <Route path="/pdf-to-word" element={<PdfToWord/>}/>
+            <Route path="/pdf-to-word" element={<PdfToWord />} />
             <Route path="/pdf-to-jpg" element={<PdfToJpg />} />
             <Route path="/pdf-to-excel" element={<PdfToExcel />} />
             <Route path="/pdf-to-png" element={<PdfToPng />} /> 
             <Route path="/word-to-pdf" element={<WordToPdf />} />
             <Route path="/png-to-pdf" element={<PngToPdf />} />
             <Route path="/zip-to-pdf" element={<ZipToPdf />} />
-             <Route path="/protect-pdf" element={<ProtectPdf />} />
-             <Route path="/unlock-pdf" element={<UnlockPdf />} />
-             <Route path="/scan-to-pdf" element={<ScanToPdf />} />
+            <Route path="/protect-pdf" element={<ProtectPdf />} />
+            <Route path="/unlock-pdf" element={<UnlockPdf />} />
+            <Route path="/scan-to-pdf" element={<ScanToPdf />} />
           </Routes>
-        
         </div>
 
-        {/* ✅ Footer added here */}
         <Footer />
       </div>
     </BrowserRouter>
