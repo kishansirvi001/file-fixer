@@ -1,6 +1,5 @@
-
 import { Link } from "react-router-dom";
-import { FaGithub, FaLinkedin, FaTwitter, FaArrowUp } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaTwitter, FaInstagram, FaArrowUp } from "react-icons/fa";
 
 function Footer() {
 
@@ -30,16 +29,19 @@ function Footer() {
             <p>⚡ Instant Processing</p>
           </div>
 
-          {/* SOCIAL */}
-          <div className="flex gap-4 text-xl">
-            <a href="https://github.com" target="_blank" className="hover:text-white transition hover:scale-110">
+          {/* ✅ SOCIAL LINKS */}
+          <div className="flex gap-4 text-xl mt-4">
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition hover:scale-110">
               <FaGithub />
             </a>
-            <a href="https://linkedin.com" target="_blank" className="hover:text-white transition hover:scale-110">
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition hover:scale-110">
               <FaLinkedin />
             </a>
-            <a href="https://twitter.com" target="_blank" className="hover:text-white transition hover:scale-110">
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition hover:scale-110">
               <FaTwitter />
+            </a>
+            <a href="https://instagram.com/kishansirvi_" target="_blank" rel="noopener noreferrer" className="hover:text-pink-400 transition hover:scale-110">
+              <FaInstagram />
             </a>
           </div>
         </div>
@@ -101,6 +103,7 @@ function Footer() {
       <div className="border-t border-gray-700 mt-10 pt-6 text-center text-sm text-gray-400">
         © {new Date().getFullYear()} FileFixer • All rights reserved
       </div>
+
     </footer>
   );
 }
