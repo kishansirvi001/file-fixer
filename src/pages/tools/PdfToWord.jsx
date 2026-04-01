@@ -1,163 +1,123 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
 
-function PdfToWord() {
-  const location = useLocation();
-  const fileInputRef = useRef();
-
+export default function PdfToWord() {
   const [file, setFile] = useState(null);
-  const [fileURL, setFileURL] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [outputURL, setOutputURL] = useState(null);
-  const [dragActive, setDragActive] = useState(false);
-  const [error, setError] = useState(null);
+  const [progress, setProgress] = useState(0);
 
-  // 🔥 AUTO LOAD FILE FROM HERO SECTION
-  useEffect(() => {
-    if (location.state?.file) {
-      setFile(location.state.file);
-      setFileURL(URL.createObjectURL(location.state.file));
+  const handleUpload = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile && selectedFile.type === "application/pdf") {
+      setFile(selectedFile);
+    } else {
+      alert("Please upload a valid PDF file.");
     }
-  }, [location]);
-
-  // 🔥 HANDLE FILE
-  const handleFile = (selectedFile) => {
-    if (!selectedFile) return;
-    setFile(selectedFile);
-    setFileURL(URL.createObjectURL(selectedFile));
-    setOutputURL(null);
-    setError(null);
   };
 
-  // 🔥 HANDLE CONVERSION
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const droppedFile = e.dataTransfer.files[0];
+    handleUpload({ target: { files: [droppedFile] } });
+  };
+
   const handleConvert = async () => {
-    if (!file) return alert("Upload PDF first");
+    if (!file) return alert("Please select a PDF file");
     setLoading(true);
-    setError(null);
+    setProgress(0);
+
+    const formData = new FormData();
+    formData.append("file", file);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "http://127.0.0.1:8000/convert", true);
+      xhr.responseType = "blob";
 
-      const res = await fetch("http://localhost:5000/pdf-to-word", {
-        method: "POST",
-        body: formData,
-      });
+      // Track upload progress
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          setProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Conversion failed");
-      }
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const blob = xhr.response;
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = file.name.replace(".pdf", ".docx");
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(url);
+          alert("Conversion complete!");
+        } else {
+          alert("Conversion failed!");
+        }
+        setLoading(false);
+      };
 
-      // Get blob from response
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      setOutputURL(url);
+      xhr.onerror = () => {
+        alert("Error converting PDF");
+        setLoading(false);
+      };
+
+      xhr.send(formData);
     } catch (err) {
       console.error(err);
-      setError(err.message || "Conversion failed");
-    } finally {
+      alert("Error converting PDF");
       setLoading(false);
     }
   };
 
   return (
-    <ToolLayout title="PDF to Word">
-      <div className="max-w-3xl mx-auto">
+    <ToolLayout title="PDF to Word Converter">
+      <div
+        className="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg"
+        onDrop={handleDrop}
+        onDragOver={(e) => e.preventDefault()}
+      >
+        {/* Upload */}
+        <label className="border-2 border-dashed border-gray-300 rounded-xl p-10 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition">
+          <p className="text-gray-500 text-lg">Drag & Drop or Click to Upload PDF</p>
+          <input type="file" accept="application/pdf" onChange={handleUpload} className="hidden" />
+        </label>
 
-        {/* HEADER */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-indigo-700">PDF to Word</h1>
-          <p className="text-gray-500 mt-2">Convert PDF into editable Word documents</p>
-        </div>
-
-        {/* UPLOAD AREA */}
-        {!file && (
-          <div
-            className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition ${
-              dragActive ? "border-indigo-600 bg-indigo-50" : "border-gray-300 bg-white"
-            }`}
-            onClick={() => fileInputRef.current.click()}
-            onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-            onDragLeave={() => setDragActive(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragActive(false);
-              handleFile(e.dataTransfer.files[0]);
-            }}
-          >
-            <div className="text-5xl mb-3">📄</div>
-            <p className="font-medium">Drag & drop PDF here</p>
-            <p className="text-sm text-gray-400">or click to upload</p>
-            <input
-              type="file"
-              accept="application/pdf"
-              ref={fileInputRef}
-              className="hidden"
-              onChange={(e) => handleFile(e.target.files[0])}
-            />
-          </div>
-        )}
-
-        {/* FILE PREVIEW */}
+        {/* File Info */}
         {file && (
-          <div className="bg-white p-6 rounded-2xl shadow-lg">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <p className="font-medium text-indigo-700">📁 {file.name}</p>
-                <p className="text-xs text-gray-400">✔ File ready</p>
-              </div>
-              <button
-                onClick={() => { setFile(null); setOutputURL(null); setError(null); }}
-                className="text-red-500 text-sm"
-              >
-                Remove
-              </button>
-            </div>
-
-            {/* PDF PREVIEW */}
-            <iframe src={fileURL} title="preview" className="w-full h-72 rounded-lg border mb-4" />
-
-            {/* CONVERT BUTTON */}
-            <button
-              onClick={handleConvert}
-              disabled={loading}
-              className={`w-full mt-2 py-3 rounded-xl font-semibold transition ${
-                loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700 text-white shadow"
-              }`}
-            >
-              {loading ? "Converting..." : "Convert to Word"}
-            </button>
-
-            {/* ERROR MESSAGE */}
-            {error && <p className="mt-3 text-red-500">{error}</p>}
+          <div className="mt-4 text-center text-gray-700">
+            Selected: <strong>{file.name}</strong>
           </div>
         )}
 
-        {/* OUTPUT */}
-        {outputURL && (
-          <div className="mt-6 text-center bg-green-50 p-4 rounded-xl">
-            <p className="text-green-600 font-medium mb-2">✅ Conversion Complete</p>
-            <a
-              href={outputURL}
-              download="converted.docx"
-              className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition"
-            >
-              Download Word File
-            </a>
-          </div>
-        )}
-
-        {/* TRUST BADGES */}
-        <div className="mt-10 text-sm text-gray-400 flex justify-center gap-6">
-          <span>🔒 Secure</span>
-          <span>⚡ Fast</span>
-          <span>🆓 Free</span>
+        {/* Convert Button */}
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={handleConvert}
+            disabled={!file || loading}
+            className={`px-8 py-3 rounded-xl text-white font-semibold transition ${
+              !file ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+            }`}
+          >
+            {loading ? `Converting... ${progress}%` : "Convert to Word"}
+          </button>
         </div>
+
+        {/* Progress Bar */}
+        {loading && (
+          <div className="mt-4">
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className="bg-blue-600 h-3 rounded-full transition-all"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+            <p className="text-center text-sm mt-1 text-gray-500">{progress}%</p>
+          </div>
+        )}
       </div>
     </ToolLayout>
   );
 }
-
-export default PdfToWord;

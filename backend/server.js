@@ -4,51 +4,97 @@ import cors from "cors";
 import { exec } from "child_process";
 import fs from "fs";
 import path from "path";
+import { v4 as uuidv4 } from "uuid";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const upload = multer({ dest: "uploads/" });
-
-if (!fs.existsSync("outputs")) fs.mkdirSync("outputs");
-
-app.post("/pdf-to-word", upload.single("file"), (req, res) => {
-  if (!req.file) return res.status(400).send("No file uploaded");
-
-  const inputPath = path.resolve(req.file.path);
-  const outputDir = path.resolve("outputs");
-
-  const outputFileName = req.file.originalname.replace(/\.pdf$/i, ".docx");
-  const outputPath = path.join(outputDir, outputFileName);
-
-  console.log("Converting PDF to Word...");
-  console.log("Input:", inputPath);
-  console.log("Output:", outputPath);
-
-  // Use full path to LibreOffice if needed
-  const sofficeCmd = "soffice"; // replace with full path on Windows if necessary
-
-  const command = `"${sofficeCmd}" --headless --convert-to docx --outdir "${outputDir}" "${inputPath}"`;
-
-  exec(command, (err, stdout, stderr) => {
-    if (err) {
-      console.error("Conversion Error:", err);
-      console.error(stderr);
-      try { fs.unlinkSync(inputPath); } catch {}
-      return res.status(500).send("PDF → Word conversion failed");
-    }
-
-    if (!fs.existsSync(outputPath)) {
-      console.error("Output file not found:", outputPath);
-      return res.status(500).send("Conversion failed: output missing");
-    }
-
-    res.download(outputPath, outputFileName, (err) => {
-      try { fs.unlinkSync(inputPath); fs.unlinkSync(outputPath); } catch {}
-      if (err) console.error(err);
-    });
-  });
+// Ensure folders exist
+["uploads", "outputs", "temp"].forEach((dir) => {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir);
 });
 
-app.listen(5000, () => console.log("Server running on http://localhost:5000"));
+// Multer setup with unique filenames
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => cb(null, uuidv4() + path.extname(file.originalname)),
+});
+
+const upload = multer({ storage });
+
+// Route: PDF → Word via ODT
+app.post("/pdf-to-word", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).send("No file uploaded");
+    if (req.file.mimetype !== "application/pdf") {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).send("Only PDF files are allowed");
+    }
+
+    const inputPath = path.resolve(req.file.path);
+    const tempDir = path.resolve("temp");
+    const outputDir = path.resolve("outputs");
+    const baseName = path.basename(req.file.filename, ".pdf");
+
+    const odtPath = path.join(tempDir, `${baseName}.odt`);
+    const finalDocxPath = path.join(outputDir, `${baseName}.docx`);
+
+    const sofficeCmd =
+      process.platform === "win32"
+        ? `"C:\\Program Files\\LibreOffice\\program\\soffice.exe"`
+        : "soffice";
+
+    // Step 1: PDF → ODT
+    const pdfToOdtCmd = `${sofficeCmd} --headless --convert-to odt --outdir "${tempDir}" "${inputPath}"`;
+    console.log("🔄 Converting PDF → ODT:", pdfToOdtCmd);
+
+    exec(pdfToOdtCmd, (err, stdout, stderr) => {
+      console.log("📄 stdout:", stdout);
+      console.log("📄 stderr:", stderr);
+
+      if (err || !fs.existsSync(odtPath)) {
+        console.error("❌ PDF → ODT conversion failed", err);
+        try { fs.unlinkSync(inputPath); } catch {}
+        return res.status(500).send("PDF → ODT conversion failed");
+      }
+
+      console.log("✅ PDF → ODT complete:", odtPath);
+
+      // Step 2: ODT → DOCX
+      const odtToDocxCmd = `${sofficeCmd} --headless --convert-to docx --outdir "${outputDir}" "${odtPath}"`;
+      console.log("🔄 Converting ODT → DOCX:", odtToDocxCmd);
+
+      exec(odtToDocxCmd, (err2, stdout2, stderr2) => {
+        console.log("📄 stdout:", stdout2);
+        console.log("📄 stderr:", stderr2);
+
+        // Cleanup input PDF & temp ODT
+        try { fs.unlinkSync(inputPath); } catch {}
+        try { fs.unlinkSync(odtPath); } catch {}
+
+        if (err2 || !fs.existsSync(finalDocxPath)) {
+          console.error("❌ ODT → DOCX conversion failed", err2);
+          return res.status(500).send("ODT → DOCX conversion failed");
+        }
+
+        console.log("✅ Conversion complete:", finalDocxPath);
+
+        // Send DOCX to client
+        res.download(finalDocxPath, `${baseName}.docx`, (err3) => {
+          if (err3) console.error("Download error:", err3);
+          try { fs.unlinkSync(finalDocxPath); } catch {}
+        });
+      });
+    });
+
+  } catch (error) {
+    console.error("Server Error:", error);
+    return res.status(500).send("Internal server error");
+  }
+});
+
+// Health check
+app.get("/", (req, res) => res.send("PDF to Word API running 🚀"));
+
+app.listen(5000, () => console.log("🚀 Server running on http://localhost:5000"));
