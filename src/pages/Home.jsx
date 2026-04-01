@@ -284,69 +284,118 @@ function Home() {
         )}
 
         {/* GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-14">
-          {filteredTools.length > 0 ? (
-            filteredTools.map((tool, index) => (
-              <Link
-                key={index}
-                to={tool.link}
-                onClick={() => handleClick(tool)}
-              >
-                <div
-                  className="group relative bg-white/70 backdrop-blur-lg p-7 rounded-2xl shadow-md border hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  {/* FAVORITE */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      toggleFavorite(tool.title);
-                    }}
-                    className="absolute top-4 left-4 text-lg"
-                  >
-                    {favorites.includes(tool.title) ? "⭐" : "☆"}
-                  </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8 mt-10 sm:mt-14">
+  {filteredTools.length > 0 ? (
+    filteredTools.map((tool, index) => (
+      <Link
+        key={index}
+        to={tool.link}
+        onClick={() => handleClick(tool)}
+      >
+        <div
+          className="
+            group relative bg-white/70 backdrop-blur-lg 
+            
+            /* 📱 MOBILE (iLovePDF style) */
+            flex items-start gap-3 p-3 rounded-xl shadow-sm
+            
+            /* 💻 DESKTOP (UNCHANGED) */
+            sm:block sm:p-7 sm:rounded-2xl sm:shadow-md 
+            sm:hover:shadow-2xl sm:hover:-translate-y-2
+            
+            transition-all duration-500
+          "
+        >
+          {/* ⭐ FAVORITE */}
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              toggleFavorite(tool.title);
+            }}
+            className="absolute top-2 left-2 text-sm sm:text-lg"
+          >
+            {favorites.includes(tool.title) ? "⭐" : "☆"}
+          </button>
 
-                  {/* POPULAR */}
-                  {tool.popular && (
-                    <div className="absolute top-4 right-4 bg-indigo-600 text-white text-xs px-3 py-1 rounded-full">
-                      Popular
-                    </div>
-                  )}
-
-                  {/* ICON */}
-                  <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-indigo-100 text-2xl mb-4 group-hover:scale-110 transition">
-                    {tool.icon}
-                  </div>
-
-                  <h3 className="text-xl font-semibold text-indigo-700">
-                    {tool.title}
-                  </h3>
-
-                  <p className="text-gray-500 mt-2 text-sm">
-                    {tool.desc}
-                  </p>
-
-                  <div className="mt-4 text-xs text-gray-400">
-                    {tool.users}
-                  </div>
-
-                  {/* CTA */}
-                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition">
-                    <span className="text-indigo-600 text-sm font-semibold">
-                      Use Tool →
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))
-          ) : (
-            <div className="col-span-3 flex flex-col items-center">
-              <div className="text-5xl mb-2">😢</div>
-              <p className="text-gray-500">No tools found</p>
+          {/* 🔥 POPULAR */}
+          {tool.popular && (
+            <div className="
+              absolute top-2 right-2 
+              text-[10px] px-2 py-0.5 rounded-full
+              
+              sm:top-4 sm:right-4 sm:text-xs sm:px-3 sm:py-1
+              bg-indigo-600 text-white
+            ">
+              Popular
             </div>
           )}
+
+          {/* ICON */}
+          <div
+            className="
+              flex-shrink-0
+              
+              /* 📱 MOBILE */
+              w-10 h-10 text-lg rounded-lg
+              
+              /* 💻 DESKTOP */
+              sm:w-14 sm:h-14 sm:text-2xl sm:rounded-xl sm:mb-4
+              
+              flex items-center justify-center bg-indigo-100
+              group-hover:scale-110 transition
+            "
+          >
+            {tool.icon}
+          </div>
+
+          {/* TEXT */}
+          <div className="flex flex-col sm:block">
+            
+            {/* TITLE */}
+            <h3 className="
+              text-sm font-semibold text-indigo-700 leading-tight
+              sm:text-xl
+            ">
+              {tool.title}
+            </h3>
+
+            {/* DESC */}
+            <p className="
+              text-xs text-gray-500 mt-1
+              line-clamp-2
+              
+              sm:text-sm sm:mt-2 sm:line-clamp-none
+            ">
+              {tool.desc}
+            </p>
+
+            {/* USERS */}
+            <div className="
+              text-[10px] text-gray-400 mt-1
+              sm:text-xs sm:mt-4
+            ">
+              {tool.users}
+            </div>
+
+            {/* CTA (only desktop) */}
+            <div className="
+              hidden sm:block mt-4 opacity-0 group-hover:opacity-100 transition
+            ">
+              <span className="text-indigo-600 text-sm font-semibold">
+                Use Tool →
+              </span>
+            </div>
+          </div>
         </div>
+      </Link>
+    ))
+  ) : (
+    <div className="col-span-3 flex flex-col items-center">
+      <div className="text-5xl mb-2">😢</div>
+      <p className="text-gray-500">No tools found</p>
+    </div>
+  )}
+</div>
       </section>
     </div>
   );

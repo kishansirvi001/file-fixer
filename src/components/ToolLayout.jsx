@@ -11,24 +11,30 @@ export default function ToolLayout({ title, children }) {
       }
     };
 
-    updateHeight(); // initial measurement
+    updateHeight();
 
-    // Re-measure on window resize
     window.addEventListener("resize", updateHeight);
-
-    return () => {
-      window.removeEventListener("resize", updateHeight);
-    };
+    return () => window.removeEventListener("resize", updateHeight);
   }, [children]);
 
   return (
-    <div className="p-4">
-      {/* Page Title */}
-      <h2 className="text-2xl font-bold mb-6">{title}</h2>
+    <div className="p-3 sm:p-4">
+      
+      {/* Title */}
+      <h2 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-6">
+        {title}
+      </h2>
 
-      {/* Tool Card Container */}
+      {/* Container */}
       <div
-        className="bg-white shadow-lg rounded-2xl p-6 transition-[height] duration-500 flex flex-col"
+        className="
+          bg-white 
+          shadow-md sm:shadow-lg 
+          rounded-xl sm:rounded-2xl 
+          p-3 sm:p-6 
+          transition-[height] duration-300
+          flex flex-col
+        "
         style={{ height }}
       >
         <div ref={containerRef}>{children}</div>
