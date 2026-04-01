@@ -18,6 +18,7 @@ import PngToPdf from "./pages/tools/PngToPdf";
 import ZipToPdf from "./pages/tools/ZipToPdf";
 import ProtectPdf from "./pages/tools/ProtectPdf";
 import UnlockPdf from "./pages/tools/UnlockPdf";
+import ScanToPdf from "./pages/tools/ScanToPdf";
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
             <Route path="/zip-to-pdf" element={<ZipToPdf />} />
              <Route path="/protect-pdf" element={<ProtectPdf />} />
              <Route path="/unlock-pdf" element={<UnlockPdf />} />
+             <Route path="/scan-to-pdf" element={<ScanToPdf />} />
           </Routes>
         
         </div>

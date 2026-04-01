@@ -12,6 +12,13 @@ function Home() {
   // 🔥 TOOL DATA
   const tools = [
     {
+  title: "Scan to PDF",
+  icon: "📷",
+  desc: "Capture document using camera and convert to PDF",
+  link: "/scan-to-pdf",
+  popular: true
+},
+    {
   title: "Merge PDF",
   icon: "📎",
   desc: "Combine multiple PDF files into one.",
