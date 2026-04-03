@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ToolLayout from "@/components/ToolLayout";
+import ToolLayout from "../../components/ToolLayout";
 
 function WordToPdf() {
   const [file, setFile] = useState(null);

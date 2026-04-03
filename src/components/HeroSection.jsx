@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -18,19 +19,21 @@ function HeroSection() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row justify-center gap-4">
+
           <Link
-            to="/merge-pdf"
+            to="/signup"
             className="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-xl hover:bg-indigo-700 transition shadow-md hover:shadow-lg"
           >
-            Merge PDFs
+            SIGN UP 🚀
           </Link>
 
           <Link
-            to="/compress-image"
-            className="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-xl hover:bg-indigo-700 transition shadow-md hover:shadow-lg"
+            to="/login"
+            className="bg-white text-indigo-600 border border-indigo-600 font-semibold px-8 py-3 rounded-xl hover:bg-indigo-50 transition shadow-md hover:shadow-lg"
           >
-            Compress Images
+            Login
           </Link>
+
         </div>
 
       </div>

@@ -1,61 +1,202 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+// Components
 import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
-import ImageCompressor from "./pages/tools/ImageCompressor";
-import JpgToPdf from "./pages/tools/JpgToPdf";
-import PdfMerge from "./pages/tools/PdfMerge";
-import PdfCompressor from "./pages/tools/PdfCompressor";
-import ImageToText from "./pages/tools/ImageToText";
-import PdfToText from "./pages/tools/PdfToText";
 import Footer from "./components/Footer";
-import PdfToWord from "./pages/tools/PdfToWord";
-import PdfToJpg from "./pages/tools/PdfToJpg";
+
+// Pages
+import Home from "./pages/Home";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
+
+// Tools
+import ImageCompressor from "./pages/tools/ImageCompressor";
+import ImageToText from "./pages/tools/ImageToText";
+import JpgToPdf from "./pages/tools/JpgToPdf";
+import PdfCompressor from "./pages/tools/PdfCompressor";
+import PdfMerge from "./pages/tools/PdfMerge";
 import PdfToExcel from "./pages/tools/PdfToExcel";
-import PdfToPng from "./pages/tools/PdfToPng";  
-import WordToPdf from "./pages/tools/WordToPdf"; 
+import PdfToJpg from "./pages/tools/PdfToJpg";
+import PdfToPng from "./pages/tools/PdfToPng";
+import PdfToText from "./pages/tools/PdfToText";
+import PdfToWord from "./pages/tools/PdfToWord";
 import PngToPdf from "./pages/tools/PngToPdf";
-import ZipToPdf from "./pages/tools/ZipToPdf";
 import ProtectPdf from "./pages/tools/ProtectPdf";
-import UnlockPdf from "./pages/tools/UnlockPdf";
 import ScanToPdf from "./pages/tools/ScanToPdf";
-import ScrollToTop from "./components/ScrollToTop";
+import UnlockPdf from "./pages/tools/UnlockPdf";
+import WordToPdf from "./pages/tools/WordToPdf";
+import ZipToPdf from "./pages/tools/ZipToPdf";
+import Welcome from "./pages/Welcome";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <BrowserRouter>
+      <Navbar />
 
-      {/* ✅ FIX: place here */}
-      <ScrollToTop />
+      <Routes>
+        {/* Main pages */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <Navbar />
+        {/* Tools */}
+ <Route
+  path="/image-compressor"
+  element={
+    <ProtectedRoute>
+      <ImageCompressor />
+    </ProtectedRoute>
+  }
+/>
 
-        {/* Main Content */}
-        <div className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/compress-image" element={<ImageCompressor />} />
-            <Route path="/jpg-to-pdf" element={<JpgToPdf />} />
-            <Route path="/merge-pdf" element={<PdfMerge />} />
-            <Route path="/compress-pdf" element={<PdfCompressor />} />
-            <Route path="/image-to-text" element={<ImageToText />} />
-            <Route path="/pdf-to-text" element={<PdfToText />} />
-            <Route path="/pdf-to-word" element={<PdfToWord />} />
-            <Route path="/pdf-to-jpg" element={<PdfToJpg />} />
-            <Route path="/pdf-to-excel" element={<PdfToExcel />} />
-            <Route path="/pdf-to-png" element={<PdfToPng />} /> 
-            <Route path="/word-to-pdf" element={<WordToPdf />} />
-            <Route path="/png-to-pdf" element={<PngToPdf />} />
-            <Route path="/zip-to-pdf" element={<ZipToPdf />} />
-            <Route path="/protect-pdf" element={<ProtectPdf />} />
-            <Route path="/unlock-pdf" element={<UnlockPdf />} />
-            <Route path="/scan-to-pdf" element={<ScanToPdf />} />
-          </Routes>
-        </div>
+<Route
+  path="/image-to-text"
+  element={
+    <ProtectedRoute>
+      <ImageToText />
+    </ProtectedRoute>
+  }
+/>
 
-        <Footer />
-      </div>
+<Route
+  path="/jpg-to-pdf"
+  element={
+    <ProtectedRoute>
+      <JpgToPdf />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/pdf-compressor"
+  element={
+    <ProtectedRoute>
+      <PdfCompressor />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/pdf-merge"
+  element={
+    <ProtectedRoute>
+      <PdfMerge />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/pdf-to-excel"
+  element={
+    <ProtectedRoute>
+      <PdfToExcel />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/pdf-to-jpg"
+  element={
+    <ProtectedRoute>
+      <PdfToJpg />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/pdf-to-png"
+  element={
+    <ProtectedRoute>
+      <PdfToPng />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/pdf-to-text"
+  element={
+    <ProtectedRoute>
+      <PdfToText />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/pdf-to-word"
+  element={
+    <ProtectedRoute>
+      <PdfToWord />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/png-to-pdf"
+  element={
+    <ProtectedRoute>
+      <PngToPdf />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/protect-pdf"
+  element={
+    <ProtectedRoute>
+      <ProtectPdf />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/scan-to-pdf"
+  element={
+    <ProtectedRoute>
+      <ScanToPdf />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/unlock-pdf"
+  element={
+    <ProtectedRoute>
+      <UnlockPdf />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/word-to-pdf"
+  element={
+    <ProtectedRoute>
+      <WordToPdf />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/zip-to-pdf"
+  element={
+    <ProtectedRoute>
+      <ZipToPdf />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/welcome"
+  element={
+    <ProtectedRoute>
+      <Welcome />
+    </ProtectedRoute>
+  }
+/>
+      </Routes>
+
+      <Footer />
     </BrowserRouter>
   );
 }

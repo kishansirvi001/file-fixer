@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ToolLayout from "@/components/ToolLayout";
 
+
 function ImageCompressor() {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);

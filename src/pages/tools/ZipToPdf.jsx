@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ToolLayout from "@/components/ToolLayout";
+import ToolLayout from "../../components/ToolLayout";
 import JSZip from "jszip";
 import { jsPDF } from "jspdf";
 

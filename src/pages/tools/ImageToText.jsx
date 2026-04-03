@@ -4,7 +4,6 @@ import ToolLayout from "@/components/ToolLayout";
 import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph } from "docx";
 import { saveAs } from "file-saver";
-
 function ImageToText() {
   const [file, setFile] = useState(null);
   const [imageURL, setImageURL] = useState(null);
