@@ -1,3 +1,14 @@
+# Node
+node_modules/
+package-lock.json
+
+# Environment
 .env
 .env.*
+
+# Uploads / storage
 backend/uploads/
+
+# Vite / React
+dist/
+.vite/
