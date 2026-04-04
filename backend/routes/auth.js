@@ -20,32 +20,31 @@ router.post("/signup", async (req, res) => {
 
     const { name, email, password, mobile, dob, gender } = req.body;
 
-    // Basic validation
+    // ✅ Validation
     if (!name || !email || !password || !dob || !gender) {
-      console.log("❌ Missing fields");
       return res.status(400).json({ message: "All required fields missing" });
     }
 
-    // Check DB connection
-    if (!User) {
-      console.log("❌ User model not loaded");
-      return res.status(500).json({ message: "Server config error" });
-    }
-
-    // Check if user exists
+    // ✅ Check existing user (EMAIL OR MOBILE)
     console.log("🔍 Checking existing user...");
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      $or: [{ email }, { mobile }]
+    });
 
     if (existingUser) {
-      console.log("⚠️ User already exists");
-      return res.status(400).json({ message: "User already exists" });
+      if (existingUser.email === email) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+      if (existingUser.mobile === mobile) {
+        return res.status(400).json({ message: "Mobile number already registered" });
+      }
     }
 
-    // Hash password
+    // ✅ Hash password
     console.log("🔐 Hashing password...");
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // ✅ Create user
     console.log("📝 Creating user...");
     const user = await User.create({
       name,
@@ -56,7 +55,7 @@ router.post("/signup", async (req, res) => {
       gender,
     });
 
-    // Generate token
+    // ✅ Generate token
     console.log("🎟 Generating token...");
     const token = generateToken(user._id);
 
@@ -73,8 +72,20 @@ router.post("/signup", async (req, res) => {
         gender: user.gender,
       },
     });
+
   } catch (err) {
     console.error("❌ SIGNUP ERROR FULL:", err);
+
+    // ✅ Handle duplicate key error (MongoDB safety)
+    if (err.code === 11000) {
+      if (err.keyPattern?.email) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
+      if (err.keyPattern?.mobile) {
+        return res.status(400).json({ message: "Mobile already exists" });
+      }
+    }
+
     res.status(500).json({
       message: "Server error",
       error: err.message,
@@ -89,26 +100,28 @@ router.post("/login", async (req, res) => {
 
     const { email, password } = req.body;
 
+    // ✅ Validation
     if (!email || !password) {
       return res.status(400).json({ message: "Email & password required" });
     }
 
+    // ✅ Find user
     console.log("🔍 Finding user...");
     const user = await User.findOne({ email });
 
     if (!user) {
-      console.log("❌ User not found");
       return res.status(400).json({ message: "User not found" });
     }
 
+    // ✅ Check password
     console.log("🔐 Comparing password...");
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      console.log("❌ Invalid password");
       return res.status(400).json({ message: "Invalid password" });
     }
 
+    // ✅ Generate token
     console.log("🎟 Generating token...");
     const token = generateToken(user._id);
 
@@ -125,8 +138,10 @@ router.post("/login", async (req, res) => {
         gender: user.gender,
       },
     });
+
   } catch (err) {
     console.error("❌ LOGIN ERROR FULL:", err);
+
     res.status(500).json({
       message: "Server error",
       error: err.message,
