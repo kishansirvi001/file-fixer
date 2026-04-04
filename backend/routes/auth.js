@@ -5,20 +5,27 @@ import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
+// Helper to generate JWT
+const generateToken = (userId) => {
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+};
+
 // ✅ SIGNUP
 router.post("/signup", async (req, res) => {
   try {
     const { name, email, password, mobile, dob, gender } = req.body;
 
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
-
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({
+    // Create user
+    const user = await User.create({
       name,
       email,
       password: hashedPassword,
@@ -27,11 +34,11 @@ router.post("/signup", async (req, res) => {
       gender,
     });
 
-    await user.save();
+    // Generate token
+    const token = generateToken(user._id);
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-
-    res.json({
+    // Respond
+    res.status(201).json({
       token,
       user: {
         id: user._id,
@@ -42,12 +49,8 @@ router.post("/signup", async (req, res) => {
         gender: user.gender,
       },
     });
-
   } catch (err) {
-    res.status(500).json({
-      message: "Server error",
-      error: err.message,
-    });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
@@ -56,23 +59,25 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Find user
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
 
+    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    // Generate token
+    const token = generateToken(user._id);
 
-    res.json({
+    res.status(200).json({
       token,
       user: {
+        id: user._id,
         name: user.name,
         email: user.email,
         mobile: user.mobile,
@@ -80,12 +85,8 @@ router.post("/login", async (req, res) => {
         gender: user.gender,
       },
     });
-
   } catch (err) {
-    res.status(500).json({
-      message: "Server error",
-      error: err.message,
-    });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 

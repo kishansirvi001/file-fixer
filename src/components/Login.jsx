@@ -18,7 +18,8 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/auth/signup`, {
+      // ✅ Use /login endpoint here
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -31,8 +32,10 @@ export default function Login() {
         return;
       }
 
+      // ✅ Save token and redirect
       localStorage.setItem("token", data.token);
-      navigate("/welcome"); // ⚠️ fix: lowercase to match signup
+      navigate("/welcome"); // adjust route as needed
+
     } catch (err) {
       setError("Server not responding.");
     } finally {
@@ -42,14 +45,12 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 relative overflow-hidden px-4">
-
       {/* 🔥 Background Blobs */}
       <div className="absolute w-72 h-72 bg-pink-400 rounded-full blur-3xl opacity-30 top-10 left-10 animate-pulse"></div>
       <div className="absolute w-72 h-72 bg-indigo-400 rounded-full blur-3xl opacity-30 bottom-10 right-10 animate-pulse"></div>
 
       {/* 🔥 Glass Card */}
       <div className="backdrop-blur-xl bg-white/10 border border-white/20 p-8 rounded-2xl shadow-2xl w-full max-w-md text-white relative z-10">
-
         <h2 className="text-3xl font-bold text-center mb-6 drop-shadow-lg">
           Welcome Back 👋
         </h2>
@@ -59,7 +60,6 @@ export default function Login() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {/* Email */}
           <input
             type="email"

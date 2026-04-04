@@ -15,13 +15,32 @@ dotenv.config();
 const app = express();
 
 // ================= MIDDLEWARE =================
-// Enable CORS for dev and production frontend
-const allowedOrigins = [
-  "http://localhost:3000",                 // React dev server
-  "https://file-fixer-five.vercel.app/"    // Replace with your Vercel URL
-];
-app.use(cors({ origin: allowedOrigins, credentials: true }));
 
+// Allowed origins for CORS
+const allowedOrigins = [
+  "http://localhost:5173",                 // React dev
+  "https://file-fixer-five.vercel.app"    // Production frontend
+];
+
+// Global CORS middleware
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow curl/Postman
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// Handle all OPTIONS preflight requests
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
+});
+
+// Parse JSON
 app.use(express.json());
 
 // ================= AUTH ROUTES =================
@@ -46,7 +65,7 @@ export const authMiddleware = (req, res, next) => {
 
 // ================= DATABASE =================
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI) // no options needed in Mongoose 7+
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
