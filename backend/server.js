@@ -14,33 +14,15 @@ import jwt from "jsonwebtoken";
 dotenv.config();
 const app = express();
 
-// ================= CORS =================
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://file-fixer-five.vercel.app"
-];
-
+// ================= CORS (FIXED) =================
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-
-    if (
-      allowedOrigins.includes(origin) ||
-      origin.endsWith(".vercel.app") // allow all Vercel deployments
-    ) {
-      return callback(null, true);
-    }
-
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true
+  origin: "*", // ✅ allow all (fixes CORS issue)
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// Handle OPTIONS
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") return res.sendStatus(204);
-  next();
-});
+// Handle preflight
+app.options("*", cors());
 
 // ================= MIDDLEWARE =================
 app.use(express.json());
