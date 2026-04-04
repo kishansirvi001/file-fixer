@@ -8,16 +8,23 @@ import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
 import multer from "multer";
-import { exec } from "child_process";
 import jwt from "jsonwebtoken";
 
 dotenv.config();
 const app = express();
 
-// ================= CORS (FINAL FIX) =================
-app.use(cors()); // ✅ simplest & most reliable
+// ================= CHECK ENV =================
+if (!process.env.MONGO_URI) {
+  console.error("❌ MONGO_URI is missing in environment variables");
+}
 
-// Manual headers (extra safety for Render + Vercel)
+if (!process.env.JWT_SECRET) {
+  console.error("❌ JWT_SECRET is missing in environment variables");
+}
+
+// ================= CORS =================
+app.use(cors());
+
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -30,7 +37,7 @@ app.use((req, res, next) => {
   );
 
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200); // ✅ handle preflight
+    return res.sendStatus(200);
   }
 
   next();
@@ -62,7 +69,8 @@ export const authMiddleware = (req, res, next) => {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
     req.user = verified;
     next();
-  } catch {
+  } catch (err) {
+    console.error("❌ JWT Error:", err.message);
     return res.status(401).json({ message: "Token expired or invalid" });
   }
 };
@@ -70,8 +78,12 @@ export const authMiddleware = (req, res, next) => {
 // ================= DATABASE =================
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+  .then(() => {
+    console.log("✅ MongoDB Connected");
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB FULL ERROR:", err);
+  });
 
 // ================= FOLDERS =================
 ["uploads", "outputs", "temp"].forEach((dir) => {
@@ -90,60 +102,16 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ================= PDF → WORD =================
-app.post("/pdf-to-word", authMiddleware, upload.single("file"), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).send("No file uploaded");
+/*
+⚠️ IMPORTANT:
+Render DOES NOT support LibreOffice → this route will crash
 
-    if (req.file.mimetype !== "application/pdf") {
-      fs.unlinkSync(req.file.path);
-      return res.status(400).send("Only PDF files allowed");
-    }
+👉 Keep it disabled for now
+*/
 
-    const inputPath = path.resolve(req.file.path);
-    const tempDir = path.resolve("temp");
-    const outputDir = path.resolve("outputs");
-
-    const baseName = path.basename(req.file.filename, ".pdf");
-    const odtPath = path.join(tempDir, `${baseName}.odt`);
-    const finalDocxPath = path.join(outputDir, `${baseName}.docx`);
-
-    const sofficeCmd =
-      process.platform === "win32"
-        ? `"C:\\Program Files\\LibreOffice\\program\\soffice.exe"`
-        : "soffice";
-
-    exec(
-      `${sofficeCmd} --headless --convert-to odt --outdir "${tempDir}" "${inputPath}"`,
-      (err) => {
-        if (err || !fs.existsSync(odtPath)) {
-          try { fs.unlinkSync(inputPath); } catch {}
-          return res.status(500).send("PDF → ODT conversion failed");
-        }
-
-        exec(
-          `${sofficeCmd} --headless --convert-to docx --outdir "${outputDir}" "${odtPath}"`,
-          (err2) => {
-            try { fs.unlinkSync(inputPath); } catch {}
-            try { fs.unlinkSync(odtPath); } catch {}
-
-            if (err2 || !fs.existsSync(finalDocxPath)) {
-              return res.status(500).send("ODT → DOCX conversion failed");
-            }
-
-            res.download(finalDocxPath, `${baseName}.docx`, (err3) => {
-              try { fs.unlinkSync(finalDocxPath); } catch {}
-              if (err3) console.error(err3);
-            });
-          }
-        );
-      }
-    );
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Server error");
-  }
-});
+// app.post("/pdf-to-word", authMiddleware, upload.single("file"), async (req, res) => {
+//   return res.status(500).json({ message: "PDF conversion disabled on server" });
+// });
 
 // ================= HEALTH =================
 app.get("/", (req, res) => {
@@ -152,6 +120,7 @@ app.get("/", (req, res) => {
 
 // ================= START =================
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
