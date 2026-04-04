@@ -15,7 +15,13 @@ dotenv.config();
 const app = express();
 
 // ================= MIDDLEWARE =================
-app.use(cors());
+// Enable CORS for dev and production frontend
+const allowedOrigins = [
+  "http://localhost:3000",                 // React dev server
+  "https://file-fixer-five.vercel.app/"    // Replace with your Vercel URL
+];
+app.use(cors({ origin: allowedOrigins, credentials: true }));
+
 app.use(express.json());
 
 // ================= AUTH ROUTES =================
@@ -47,7 +53,7 @@ mongoose
 // ================= CREATE REQUIRED FOLDERS =================
 ["uploads", "outputs", "temp"].forEach((dir) => {
   const fullPath = path.resolve(dir);
-  if (!fs.existsSync(fullPath)) fs.mkdirSync(fullPath);
+  if (!fs.existsSync(fullPath)) fs.mkdirSync(fullPath, { recursive: true });
 });
 
 // ================= MULTER SETUP =================
@@ -80,7 +86,7 @@ app.post("/pdf-to-word", authMiddleware, upload.single("file"), async (req, res)
     // STEP 1: PDF → ODT
     exec(`${sofficeCmd} --headless --convert-to odt --outdir "${tempDir}" "${inputPath}"`, (err) => {
       if (err || !fs.existsSync(odtPath)) {
-        fs.unlinkSync(inputPath);
+        try { fs.unlinkSync(inputPath); } catch {}
         return res.status(500).send("PDF → ODT conversion failed");
       }
 

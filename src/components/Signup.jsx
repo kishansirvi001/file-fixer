@@ -1,6 +1,7 @@
 // src/components/Signup.jsx
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { API_BASE } from "../config";
 
 export default function Signup() {
   const [form, setForm] = useState({
@@ -39,7 +40,7 @@ export default function Signup() {
     }
 
     try {
-      const res = await fetch("/api/auth/signup", {
+      const res = await fetch(`${API_BASE}/api/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
