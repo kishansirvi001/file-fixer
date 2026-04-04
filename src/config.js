@@ -1,7 +1,6 @@
 // src/config.js
 
-const dev = process.env.NODE_ENV !== "production";
+// Always use environment variable (works for both dev + production)
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-export const API_BASE = dev
-  ? "http://localhost:5000" // Local backend for development
-  : "https://file-fixer.onrender.com" // Replace with your Render backend URL
+export { API_BASE };
