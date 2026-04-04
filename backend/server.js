@@ -14,15 +14,27 @@ import jwt from "jsonwebtoken";
 dotenv.config();
 const app = express();
 
-// ================= CORS (FIXED) =================
-app.use(cors({
-  origin: "*", // ✅ allow all (fixes CORS issue)
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+// ================= CORS (FINAL FIX) =================
+app.use(cors()); // ✅ simplest & most reliable
 
-// Handle preflight
+// Manual headers (extra safety for Render + Vercel)
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
 
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200); // ✅ handle preflight
+  }
+
+  next();
+});
 
 // ================= MIDDLEWARE =================
 app.use(express.json());
@@ -56,12 +68,13 @@ export const authMiddleware = (req, res, next) => {
 };
 
 // ================= DATABASE =================
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.error("❌ MongoDB connection error:", err));
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // ================= FOLDERS =================
-["uploads", "outputs", "temp"].forEach(dir => {
+["uploads", "outputs", "temp"].forEach((dir) => {
   const fullPath = path.resolve(dir);
   if (!fs.existsSync(fullPath)) {
     fs.mkdirSync(fullPath, { recursive: true });
@@ -72,7 +85,7 @@ mongoose.connect(process.env.MONGO_URI)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) =>
-    cb(null, uuidv4() + path.extname(file.originalname))
+    cb(null, uuidv4() + path.extname(file.originalname)),
 });
 
 const upload = multer({ storage });
@@ -100,29 +113,32 @@ app.post("/pdf-to-word", authMiddleware, upload.single("file"), async (req, res)
         ? `"C:\\Program Files\\LibreOffice\\program\\soffice.exe"`
         : "soffice";
 
-    // STEP 1
-    exec(`${sofficeCmd} --headless --convert-to odt --outdir "${tempDir}" "${inputPath}"`, (err) => {
-      if (err || !fs.existsSync(odtPath)) {
-        try { fs.unlinkSync(inputPath); } catch {}
-        return res.status(500).send("PDF → ODT conversion failed");
-      }
-
-      // STEP 2
-      exec(`${sofficeCmd} --headless --convert-to docx --outdir "${outputDir}" "${odtPath}"`, (err2) => {
-        try { fs.unlinkSync(inputPath); } catch {}
-        try { fs.unlinkSync(odtPath); } catch {}
-
-        if (err2 || !fs.existsSync(finalDocxPath)) {
-          return res.status(500).send("ODT → DOCX conversion failed");
+    exec(
+      `${sofficeCmd} --headless --convert-to odt --outdir "${tempDir}" "${inputPath}"`,
+      (err) => {
+        if (err || !fs.existsSync(odtPath)) {
+          try { fs.unlinkSync(inputPath); } catch {}
+          return res.status(500).send("PDF → ODT conversion failed");
         }
 
-        res.download(finalDocxPath, `${baseName}.docx`, (err3) => {
-          try { fs.unlinkSync(finalDocxPath); } catch {}
-          if (err3) console.error(err3);
-        });
-      });
-    });
+        exec(
+          `${sofficeCmd} --headless --convert-to docx --outdir "${outputDir}" "${odtPath}"`,
+          (err2) => {
+            try { fs.unlinkSync(inputPath); } catch {}
+            try { fs.unlinkSync(odtPath); } catch {}
 
+            if (err2 || !fs.existsSync(finalDocxPath)) {
+              return res.status(500).send("ODT → DOCX conversion failed");
+            }
+
+            res.download(finalDocxPath, `${baseName}.docx`, (err3) => {
+              try { fs.unlinkSync(finalDocxPath); } catch {}
+              if (err3) console.error(err3);
+            });
+          }
+        );
+      }
+    );
   } catch (error) {
     console.error(error);
     res.status(500).send("Server error");
