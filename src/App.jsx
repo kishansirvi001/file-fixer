@@ -1,14 +1,17 @@
+// App.js
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Components
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Pages
 import Home from "./pages/Home";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
+import Welcome from "./pages/Welcome";
 
 // Tools
 import ImageCompressor from "./pages/tools/ImageCompressor";
@@ -27,8 +30,27 @@ import ScanToPdf from "./pages/tools/ScanToPdf";
 import UnlockPdf from "./pages/tools/UnlockPdf";
 import WordToPdf from "./pages/tools/WordToPdf";
 import ZipToPdf from "./pages/tools/ZipToPdf";
-import Welcome from "./pages/Welcome";
-import ProtectedRoute from "./components/ProtectedRoute";
+
+// Helper array to simplify routes
+const protectedTools = [
+  { path: "/image-compressor", component: <ImageCompressor /> },
+  { path: "/image-to-text", component: <ImageToText /> },
+  { path: "/jpg-to-pdf", component: <JpgToPdf /> },
+  { path: "/pdf-compressor", component: <PdfCompressor /> },
+  { path: "/pdf-merge", component: <PdfMerge /> },
+  { path: "/pdf-to-excel", component: <PdfToExcel /> },
+  { path: "/pdf-to-jpg", component: <PdfToJpg /> },
+  { path: "/pdf-to-png", component: <PdfToPng /> },
+  { path: "/pdf-to-text", component: <PdfToText /> },
+  { path: "/pdf-to-word", component: <PdfToWord /> },
+  { path: "/png-to-pdf", component: <PngToPdf /> },
+  { path: "/protect-pdf", component: <ProtectPdf /> },
+  { path: "/scan-to-pdf", component: <ScanToPdf /> },
+  { path: "/unlock-pdf", component: <UnlockPdf /> },
+  { path: "/word-to-pdf", component: <WordToPdf /> },
+  { path: "/zip-to-pdf", component: <ZipToPdf /> },
+  { path: "/welcome", component: <Welcome /> },
+];
 
 function App() {
   return (
@@ -41,159 +63,14 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Tools */}
- <Route
-  path="/image-compressor"
-  element={
-    <ProtectedRoute>
-      <ImageCompressor />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/image-to-text"
-  element={
-    <ProtectedRoute>
-      <ImageToText />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/jpg-to-pdf"
-  element={
-    <ProtectedRoute>
-      <JpgToPdf />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/pdf-compressor"
-  element={
-    <ProtectedRoute>
-      <PdfCompressor />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/pdf-merge"
-  element={
-    <ProtectedRoute>
-      <PdfMerge />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/pdf-to-excel"
-  element={
-    <ProtectedRoute>
-      <PdfToExcel />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/pdf-to-jpg"
-  element={
-    <ProtectedRoute>
-      <PdfToJpg />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/pdf-to-png"
-  element={
-    <ProtectedRoute>
-      <PdfToPng />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/pdf-to-text"
-  element={
-    <ProtectedRoute>
-      <PdfToText />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/pdf-to-word"
-  element={
-    <ProtectedRoute>
-      <PdfToWord />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/png-to-pdf"
-  element={
-    <ProtectedRoute>
-      <PngToPdf />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/protect-pdf"
-  element={
-    <ProtectedRoute>
-      <ProtectPdf />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/scan-to-pdf"
-  element={
-    <ProtectedRoute>
-      <ScanToPdf />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/unlock-pdf"
-  element={
-    <ProtectedRoute>
-      <UnlockPdf />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/word-to-pdf"
-  element={
-    <ProtectedRoute>
-      <WordToPdf />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/zip-to-pdf"
-  element={
-    <ProtectedRoute>
-      <ZipToPdf />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/welcome"
-  element={
-    <ProtectedRoute>
-      <Welcome />
-    </ProtectedRoute>
-  }
-/>
+        {/* Protected tool pages */}
+        {protectedTools.map((tool) => (
+          <Route
+            key={tool.path}
+            path={tool.path}
+            element={<ProtectedRoute>{tool.component}</ProtectedRoute>}
+          />
+        ))}
       </Routes>
 
       <Footer />
@@ -201,4 +78,4 @@ function App() {
   );
 }
 
-export default App;
+export default App;s
