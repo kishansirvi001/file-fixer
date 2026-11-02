@@ -12,19 +12,19 @@ function ZipToPdf() {
   // 🔥 HANDLE FILE
   const handleFile = async (selectedFile) => {
     if (!selectedFile) return;
-
-    setFile(selectedFile);
-    setOutput("");
-
-    // Preview: count images inside zip
-    const zip = new JSZip();
-    const content = await zip.loadAsync(selectedFile);
-
-    const images = Object.values(content.files).filter(
-      (f) => !f.dir && /\.(png|jpg|jpeg)$/i.test(f.name)
-    );
-
-    setImageCount(images.length);
+    try {
+      const content = await new JSZip().loadAsync(selectedFile);
+      const images = Object.values(content.files).filter(
+        (entry) => !entry.dir && /\.(png|jpg|jpeg)$/i.test(entry.name),
+      ).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      setFile(selectedFile);
+      setImageCount(images.length);
+      setOutput("");
+    } catch {
+      setFile(null);
+      setImageCount(0);
+      alert("This ZIP file could not be opened.");
+    }
   };
 
   // 🔥 CONVERT
@@ -34,53 +34,38 @@ function ZipToPdf() {
     setLoading(true);
     setOutput("");
 
-    const zip = new JSZip();
-    const content = await zip.loadAsync(file);
-    const pdf = new jsPDF();
-    let firstPage = true;
+    try {
+      const content = await new JSZip().loadAsync(file);
+      const imageFiles = Object.values(content.files).filter(
+        (entry) => !entry.dir && /\.(png|jpg|jpeg)$/i.test(entry.name),
+      ).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      if (imageFiles.length === 0) throw new Error("No PNG or JPG images were found in this ZIP.");
 
-    const imageFiles = Object.values(content.files).filter(
-      (f) => !f.dir && /\.(png|jpg|jpeg)$/i.test(f.name)
-    );
-
-    if (imageFiles.length === 0) {
+      const pdf = new jsPDF();
+      for (let index = 0; index < imageFiles.length; index += 1) {
+        const entry = imageFiles[index];
+        const mime = /\.png$/i.test(entry.name) ? "image/png" : "image/jpeg";
+        const img = new Image();
+        img.src = `data:${mime};base64,${await entry.async("base64")}`;
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error(`Could not read ${entry.name}.`));
+        });
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const ratio = Math.min(pageWidth / img.width, pageHeight / img.height);
+        const width = img.width * ratio;
+        const height = img.height * ratio;
+        if (index) pdf.addPage();
+        pdf.addImage(img, mime === "image/png" ? "PNG" : "JPEG", (pageWidth - width) / 2, (pageHeight - height) / 2, width, height);
+      }
+      pdf.save("converted.pdf");
+      setOutput("PDF generated successfully!");
+    } catch (error) {
+      alert(error.message || "Could not convert the ZIP file.");
+    } finally {
       setLoading(false);
-      return alert("No images found!");
     }
-
-    for (const imgFile of imageFiles) {
-      const imgData = await imgFile.async("base64");
-      const img = new Image();
-      img.src = `data:image/*;base64,${imgData}`;
-
-      await new Promise((resolve) => {
-        img.onload = () => {
-          const pageWidth = pdf.internal.pageSize.getWidth();
-          const pageHeight = pdf.internal.pageSize.getHeight();
-
-          const ratio = Math.min(
-            pageWidth / img.width,
-            pageHeight / img.height
-          );
-
-          const imgWidth = img.width * ratio;
-          const imgHeight = img.height * ratio;
-
-          const x = (pageWidth - imgWidth) / 2;
-          const y = (pageHeight - imgHeight) / 2;
-
-          if (!firstPage) pdf.addPage();
-          pdf.addImage(img, "JPEG", x, y, imgWidth, imgHeight);
-
-          firstPage = false;
-          resolve();
-        };
-      });
-    }
-
-    pdf.save("converted.pdf");
-    setLoading(false);
-    setOutput("✅ PDF generated successfully!");
   };
 
   return (

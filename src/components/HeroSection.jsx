@@ -1,41 +1,10 @@
-
-import React from "react";
-import { Link } from "react-router-dom";
-
 function HeroSection() {
   return (
-    <section className="bg-gradient-to-b from-white to-indigo-50 py-24">
-      <div className="max-w-4xl mx-auto text-center px-6">
-        
-        {/* Heading */}
-        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
-          All-in-One PDF & Image Tools
-        </h1>
-
-        {/* Subheading */}
-        <p className="text-gray-600 text-lg md:text-xl mb-10">
-          Compress, Convert, Merge, and Edit your files quickly and securely — all in one place.
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-
-          <Link
-            to="/signup"
-            className="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-xl hover:bg-indigo-700 transition shadow-md hover:shadow-lg"
-          >
-            SIGN UP 🚀
-          </Link>
-
-          <Link
-            to="/login"
-            className="bg-white text-indigo-600 border border-indigo-600 font-semibold px-8 py-3 rounded-xl hover:bg-indigo-50 transition shadow-md hover:shadow-lg"
-          >
-            Login
-          </Link>
-
-        </div>
-
+    <section className="bg-white px-5 pb-10 pt-14 text-center sm:pb-14 sm:pt-20">
+      <div className="mx-auto max-w-3xl">
+        <p className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-[#e5322d]">Your files, made simple</p>
+        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">Every tool you need to work with PDFs</h1>
+        <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-gray-500 sm:text-lg">Convert, compress, merge and organize your documents in just a few clicks.</p>
       </div>
     </section>
   );

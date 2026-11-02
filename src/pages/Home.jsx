@@ -3,11 +3,19 @@ import { useState, useEffect } from "react";
 import HeroSection from "@/components/HeroSection";
 
 function Home() {
+  const readList = (key) => {
+    try {
+      const value = JSON.parse(localStorage.getItem(key) || "[]");
+      return Array.isArray(value) ? value : [];
+    } catch {
+      return [];
+    }
+  };
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [favorites, setFavorites] = useState([]);
-  const [recent, setRecent] = useState([]);
+  const [favorites, setFavorites] = useState(() => readList("favorites"));
+  const [recent, setRecent] = useState(() => readList("recent"));
 
   // 🔥 TOOL DATA
   const tools = [
@@ -22,7 +30,7 @@ function Home() {
   title: "Merge PDF",
   icon: "📎",
   desc: "Combine multiple PDF files into one.",
-  link: "/merge-pdf",
+  link: "/pdf-merge",
   popular: true,
   users: "1.3M+ users",
   category: "to-pdf",
@@ -139,7 +147,7 @@ function Home() {
       title: "Image Compressor",
       icon: "🖼️",
       desc: "Reduce image size.",
-      link: "/compress-image",
+      link: "/image-compressor",
       popular: true,
       users: "980K+ users",
       category: "compress",
@@ -148,7 +156,7 @@ function Home() {
       title: "PDF Compressor",
       icon: "🗜️",
       desc: "Reduce PDF size.",
-      link: "/compress-pdf",
+      link: "/pdf-compressor",
       popular: true,
       users: "1.5M+ users",
       category: "compress",
@@ -162,12 +170,6 @@ function Home() {
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
-
-  // 🔥 LOAD LOCAL STORAGE
-  useEffect(() => {
-    setFavorites(JSON.parse(localStorage.getItem("favorites")) || []);
-    setRecent(JSON.parse(localStorage.getItem("recent")) || []);
-  }, []);
 
   // 🔥 FAVORITE TOGGLE
   const toggleFavorite = (title) => {
@@ -206,13 +208,13 @@ function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-100">
+    <div className="min-h-screen bg-[#f7f7f7]">
       <HeroSection />
 
-      <section className="max-w-6xl mx-auto px-6 py-20">
+      <section className="max-w-6xl mx-auto px-5 pb-20 pt-8 sm:px-6">
         {/* TITLE */}
-        <h2 className="text-4xl font-bold text-center text-indigo-700">
-          Our Tools
+        <h2 className="text-2xl font-bold text-center text-gray-900 sm:text-3xl">
+          Popular PDF tools
         </h2>
 
         <p className="text-center text-gray-500 mt-3">
@@ -226,7 +228,7 @@ function Home() {
             placeholder="Search tools..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full max-w-md px-5 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-400 shadow"
+            className="w-full max-w-xl rounded-lg border border-gray-300 bg-white px-5 py-3.5 text-sm shadow-sm outline-none transition focus:border-[#e5322d] focus:ring-2 focus:ring-red-100"
           />
         </div>
 
@@ -246,8 +248,8 @@ function Home() {
               onClick={() => setFilter(type)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition ${
                 filter === type
-                  ? "bg-indigo-600 text-white scale-105"
-                  : "bg-white border hover:bg-indigo-50"
+                  ? "bg-[#e5322d] text-white shadow-sm"
+                  : "bg-white border border-gray-200 text-gray-700 hover:border-[#e5322d] hover:text-[#e5322d]"
               }`}
             >
               {
@@ -284,7 +286,7 @@ function Home() {
         )}
 
         {/* GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8 mt-10 sm:mt-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 mt-8 sm:mt-10">
   {filteredTools.length > 0 ? (
     filteredTools.map((tool, index) => (
       <Link
@@ -294,14 +296,14 @@ function Home() {
       >
         <div
           className="
-            group relative bg-white/70 backdrop-blur-lg 
+            group relative bg-white border border-gray-200
             
             /* 📱 MOBILE (iLovePDF style) */
-            flex items-start gap-3 p-3 rounded-xl shadow-sm
+            flex items-start gap-3 p-4 rounded-lg shadow-sm
             
             /* 💻 DESKTOP (UNCHANGED) */
-            sm:block sm:p-7 sm:rounded-2xl sm:shadow-md 
-            sm:hover:shadow-2xl sm:hover:-translate-y-2
+            sm:block sm:p-6 sm:rounded-lg sm:shadow-sm
+            sm:hover:shadow-md sm:hover:-translate-y-0.5
             
             transition-all duration-500
           "
@@ -324,7 +326,7 @@ function Home() {
               text-[10px] px-2 py-0.5 rounded-full
               
               sm:top-4 sm:right-4 sm:text-xs sm:px-3 sm:py-1
-              bg-indigo-600 text-white
+              bg-[#e5322d] text-white
             ">
               Popular
             </div>
@@ -341,7 +343,7 @@ function Home() {
               /* 💻 DESKTOP */
               sm:w-14 sm:h-14 sm:text-2xl sm:rounded-xl sm:mb-4
               
-              flex items-center justify-center bg-indigo-100
+              flex items-center justify-center rounded-lg bg-red-50
               group-hover:scale-110 transition
             "
           >
@@ -353,7 +355,7 @@ function Home() {
             
             {/* TITLE */}
             <h3 className="
-              text-sm font-semibold text-indigo-700 leading-tight
+              text-sm font-semibold text-gray-900 leading-tight
               sm:text-xl
             ">
               {tool.title}
@@ -381,7 +383,7 @@ function Home() {
             <div className="
               hidden sm:block mt-4 opacity-0 group-hover:opacity-100 transition
             ">
-              <span className="text-indigo-600 text-sm font-semibold">
+              <span className="text-[#e5322d] text-sm font-semibold">
                 Use Tool →
               </span>
             </div>

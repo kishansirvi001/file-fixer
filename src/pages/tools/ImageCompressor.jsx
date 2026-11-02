@@ -14,6 +14,10 @@ function ImageCompressor() {
   const handleFiles = (files) => {
     const file = files[0];
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Please choose an image file.");
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => setPreview(e.target.result);
@@ -84,8 +88,9 @@ function ImageCompressor() {
     if (image && preview) {
       compressImage(quality);
     }
+    // compressImage reads the current image and quality; this effect reruns when either changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quality]);
+  }, [image, preview, quality]);
 
   // Cleanup compressed object URL
   useEffect(() => {
@@ -138,6 +143,8 @@ function ImageCompressor() {
             />
           </div>
         )}
+
+        {loading && <p className="mb-4 text-center text-sm text-indigo-600">Compressing image…</p>}
 
         {/* Preview Section */}
         {preview && (

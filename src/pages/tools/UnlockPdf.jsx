@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
 import toast, { Toaster } from "react-hot-toast";
+import { PDF_API_BASE } from "@/config";
 
 function UnlockPdf() {
   const [file, setFile] = useState(null);
@@ -35,25 +36,28 @@ function UnlockPdf() {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:5000/unlock-pdf", {
+      const res = await fetch(`${PDF_API_BASE}/unlock-pdf`, {
         method: "POST",
         body: formData,
       });
 
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) throw new Error((await res.json()).detail || "Could not unlock this PDF.");
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = file.name; // keep same name
+      a.download = `${file.name.replace(/\.pdf$/i, "")}-unlocked.pdf`;
       a.click();
+      URL.revokeObjectURL(url);
 
       toast.success("PDF Unlocked 🎉");
 
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err instanceof TypeError
+        ? "PDF service did not respond. Check the Vite terminal for its startup error, then restart npm run dev."
+        : err.message);
     } finally {
       setLoading(false);
     }

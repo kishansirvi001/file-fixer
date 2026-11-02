@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Tesseract from "tesseract.js";
 import * as pdfjsLib from "pdfjs-dist";
-import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph } from "docx";
 import { saveAs } from "file-saver";
 import ToolLayout from "@/components/ToolLayout";

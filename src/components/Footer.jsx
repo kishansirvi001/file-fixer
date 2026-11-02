@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaGithub, FaLinkedin, FaTwitter, FaInstagram, FaArrowUp } from "react-icons/fa";
+import { API_BASE } from "../config";
 
 function Footer() {
   const [email, setEmail] = useState("");
@@ -13,7 +14,7 @@ function Footer() {
     if (!email) return alert("Please enter your email!");
 
     try {
-      const res = await fetch("/api/sendEmail", {
+      const res = await fetch(`${API_BASE}/api/sendEmail`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -55,9 +56,9 @@ function Footer() {
         <div>
           <h3 className="text-lg font-semibold text-white mb-4">PDF Tools</h3>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/compress-pdf" className="hover:text-white transition">Compress PDF</Link></li>
-            <li><Link to="/merge-pdf" className="hover:text-white transition">Merge PDF</Link></li>
-            <li><Link to="/split-pdf" className="hover:text-white transition">Split PDF</Link></li>
+            <li><Link to="/pdf-compressor" className="hover:text-white transition">Compress PDF</Link></li>
+            <li><Link to="/pdf-merge" className="hover:text-white transition">Merge PDF</Link></li>
+            <li><Link to="/pdf-split" className="hover:text-white transition">Split PDF</Link></li>
             <li><Link to="/pdf-to-word" className="hover:text-white transition">PDF to Word</Link></li>
           </ul>
         </div>

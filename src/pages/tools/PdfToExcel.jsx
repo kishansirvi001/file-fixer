@@ -1,86 +1,36 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
+import { createXlsx, extractPdfRows, loadPdf } from "@/lib/pdfTools";
 
-function PdfToExcel() {
+export default function PdfToExcel() {
   const [file, setFile] = useState(null);
-  const [output, setOutput] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleConvert = () => {
-    if (!file) return alert("Please upload a PDF first");
-
+  const convert = async () => {
+    if (!file) return;
     setLoading(true);
-
-    // Demo conversion (replace with real API later)
-    setTimeout(() => {
-      const fake = URL.createObjectURL(file);
-      setOutput(fake);
+    try {
+      const pages = await extractPdfRows(await loadPdf(file));
+      const workbook = await createXlsx(pages);
+      const url = URL.createObjectURL(workbook);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${file.name.replace(/\.pdf$/i, "")}.xlsx`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      alert(error.message || "Could not extract this PDF.");
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
-  return (
-    <ToolLayout title="PDF to Excel Converter">
-      <div className="max-w-2xl mx-auto text-center">
-
-        {/* Title */}
-        <h1 className="text-3xl font-bold mb-2">Convert PDF to Excel</h1>
-        <p className="text-gray-500 mb-6">
-          Quickly convert your PDF tables into editable Excel (.xlsx) spreadsheets.
-        </p>
-
-        {/* Upload Area */}
-        <div className="border-2 border-dashed border-gray-300 rounded-2xl p-10 cursor-pointer hover:border-indigo-500 transition bg-white shadow-sm">
-          <input
-            type="file"
-            accept="application/pdf"
-            className="hidden"
-            id="upload"
-            onChange={(e) => {
-              setFile(e.target.files[0]);
-              setOutput(null);
-            }}
-          />
-
-          <label htmlFor="upload" className="cursor-pointer">
-            <div className="text-5xl mb-3">📊</div>
-            <p className="text-lg font-medium">{file ? file.name : "Select PDF file"}</p>
-            <p className="text-sm text-gray-400">or drag and drop here</p>
-          </label>
-        </div>
-
-        {/* Convert Button */}
-        <button
-          onClick={handleConvert}
-          disabled={loading}
-          className="mt-6 w-full bg-indigo-600 text-white py-3 rounded-xl font-medium hover:bg-indigo-700 transition"
-        >
-          {loading ? "Converting..." : "Convert to Excel"}
-        </button>
-
-        {/* Output */}
-        {output && (
-          <div className="mt-6">
-            <a
-              href={output}
-              download="converted.xlsx"
-              className="text-indigo-600 font-semibold underline"
-            >
-              Download Excel File
-            </a>
-          </div>
-        )}
-
-        {/* Trust Badges */}
-        <div className="mt-10 text-sm text-gray-400 flex justify-center gap-6">
-          <span>🔒 Secure</span>
-          <span>⚡ Fast</span>
-          <span>🆓 Free</span>
-        </div>
-
-      </div>
-    </ToolLayout>
-  );
+  return <ToolLayout title="PDF to Excel Converter">
+    <div className="mx-auto max-w-2xl space-y-5 text-center">
+      <p className="text-gray-600">Extract selectable PDF text into editable worksheet rows. Scanned PDFs need OCR first.</p>
+      <input type="file" accept="application/pdf,.pdf" onChange={(event) => setFile(event.target.files?.[0] || null)} className="block w-full rounded-lg border p-4" />
+      {file && <p className="text-sm text-gray-600">{file.name}</p>}
+      <button onClick={convert} disabled={!file || loading} className="w-full rounded-xl bg-indigo-600 py-3 font-medium text-white disabled:opacity-50">{loading ? "Extracting…" : "Convert to Excel"}</button>
+    </div>
+  </ToolLayout>;
 }
-
-export default PdfToExcel;

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ToolLayout from "@/components/ToolLayout";
 import toast, { Toaster } from "react-hot-toast";
+import { PDF_API_BASE } from "@/config";
 
 function ProtectPdf() {
   const [file, setFile] = useState(null);
@@ -44,28 +45,31 @@ function ProtectPdf() {
       setLoading(true);
       setProgress(20);
 
-      const res = await fetch("http://localhost:5000/protect-pdf", {
+      const res = await fetch(`${PDF_API_BASE}/protect-pdf`, {
         method: "POST",
         body: formData,
       });
 
       setProgress(70);
 
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) throw new Error((await res.json()).detail || "Could not protect this PDF.");
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = file.name; // keep same name
+      a.download = `${file.name.replace(/\.pdf$/i, "")}-protected.pdf`;
       a.click();
+      URL.revokeObjectURL(url);
 
       setProgress(100);
       toast.success("PDF Protected Successfully 🎉");
 
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err instanceof TypeError
+        ? "PDF service did not respond. Check the Vite terminal for its startup error, then restart npm run dev."
+        : err.message);
     } finally {
       setLoading(false);
       setTimeout(() => setProgress(0), 2000);

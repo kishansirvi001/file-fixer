@@ -1,17 +1,13 @@
 // App.js
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Components
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import ProtectedRoute from "./components/ProtectedRoute";
 
 // Pages
 import Home from "./pages/Home";
-import Login from "./components/Login";
-import Signup from "./components/Signup";
-import Welcome from "./pages/Welcome";
 
 // Tools
 import ImageCompressor from "./pages/tools/ImageCompressor";
@@ -24,6 +20,7 @@ import PdfToJpg from "./pages/tools/PdfToJpg";
 import PdfToPng from "./pages/tools/PdfToPng";
 import PdfToText from "./pages/tools/PdfToText";
 import PdfToWord from "./pages/tools/PdfToWord";
+import PdfSplit from "./pages/tools/PdfSplit";
 import PngToPdf from "./pages/tools/PngToPdf";
 import ProtectPdf from "./pages/tools/ProtectPdf";
 import ScanToPdf from "./pages/tools/ScanToPdf";
@@ -38,6 +35,7 @@ const protectedTools = [
   { path: "/jpg-to-pdf", component: <JpgToPdf /> },
   { path: "/pdf-compressor", component: <PdfCompressor /> },
   { path: "/pdf-merge", component: <PdfMerge /> },
+  { path: "/pdf-split", component: <PdfSplit /> },
   { path: "/pdf-to-excel", component: <PdfToExcel /> },
   { path: "/pdf-to-jpg", component: <PdfToJpg /> },
   { path: "/pdf-to-png", component: <PdfToPng /> },
@@ -49,10 +47,14 @@ const protectedTools = [
   { path: "/unlock-pdf", component: <UnlockPdf /> },
   { path: "/word-to-pdf", component: <WordToPdf /> },
   { path: "/zip-to-pdf", component: <ZipToPdf /> },
-  { path: "/welcome", component: <Welcome /> },
 ];
 
 function App() {
+  useEffect(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  }, []);
+
   return (
     <BrowserRouter>
       <Navbar />
@@ -60,16 +62,10 @@ function App() {
       <Routes>
         {/* Main pages */}
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-
-        {/* Protected tool pages */}
+        <Route path="*" element={<Home />} />
+        {/* PDF tools are available without an account */}
         {protectedTools.map((tool) => (
-          <Route
-            key={tool.path}
-            path={tool.path}
-            element={<ProtectedRoute>{tool.component}</ProtectedRoute>}
-          />
+          <Route key={tool.path} path={tool.path} element={tool.component} />
         ))}
       </Routes>
 
