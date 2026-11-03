@@ -19,7 +19,7 @@ function ProtectPdf() {
   const handleFile = (f) => {
     if (!f) return;
 
-    if (f.type !== "application/pdf") {
+    if (f.type !== "application/pdf" && !f.name.toLowerCase().endsWith(".pdf")) {
       toast.error("Only PDF files allowed");
       return;
     }
@@ -52,7 +52,10 @@ function ProtectPdf() {
 
       setProgress(70);
 
-      if (!res.ok) throw new Error((await res.json()).detail || "Could not protect this PDF.");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || "Could not protect this PDF.");
+      }
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -61,7 +64,7 @@ function ProtectPdf() {
       a.href = url;
       a.download = `${file.name.replace(/\.pdf$/i, "")}-protected.pdf`;
       a.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
 
       setProgress(100);
       toast.success("PDF Protected Successfully 🎉");
@@ -161,7 +164,7 @@ function ProtectPdf() {
         {/* Button */}
         <button
           onClick={handleSubmit}
-          disabled={loading}
+          disabled={loading || !file || !password}
           className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition font-medium"
         >
           {loading ? "Processing..." : "Protect PDF"}

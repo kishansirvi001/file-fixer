@@ -13,7 +13,10 @@ export default function WordToPdf() {
       const form = new FormData();
       form.append("file", file);
       const response = await fetch(`${PDF_API_BASE}/word-to-pdf`, { method: "POST", body: form });
-      if (!response.ok) throw new Error((await response.json()).detail || "The conversion service could not convert this document.");
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.detail || "The conversion service could not convert this document.");
+      }
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");

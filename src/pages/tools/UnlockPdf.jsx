@@ -11,7 +11,7 @@ function UnlockPdf() {
   const handleFile = (f) => {
     if (!f) return;
 
-    if (f.type !== "application/pdf") {
+    if (f.type !== "application/pdf" && !f.name.toLowerCase().endsWith(".pdf")) {
       toast.error("Only PDF allowed");
       return;
     }
@@ -41,7 +41,10 @@ function UnlockPdf() {
         body: formData,
       });
 
-      if (!res.ok) throw new Error((await res.json()).detail || "Could not unlock this PDF.");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || "Could not unlock this PDF.");
+      }
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -50,7 +53,7 @@ function UnlockPdf() {
       a.href = url;
       a.download = `${file.name.replace(/\.pdf$/i, "")}-unlocked.pdf`;
       a.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
 
       toast.success("PDF Unlocked 🎉");
 
@@ -106,7 +109,7 @@ function UnlockPdf() {
         {/* Button */}
         <button
           onClick={handleSubmit}
-          disabled={loading}
+          disabled={loading || !file || !password}
           className="bg-green-600 text-white py-3 rounded w-full"
         >
           {loading ? "Unlocking..." : "Unlock PDF"}
