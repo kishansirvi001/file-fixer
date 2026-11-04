@@ -1,44 +1,15 @@
-import React, { useRef, useState, useEffect } from "react";
-
 export default function ToolLayout({ title, children }) {
-  const containerRef = useRef(null);
-  const [height, setHeight] = useState("auto");
-
-  useEffect(() => {
-    const updateHeight = () => {
-      if (containerRef.current) {
-        setHeight(containerRef.current.scrollHeight + "px");
-      }
-    };
-
-    updateHeight();
-
-    window.addEventListener("resize", updateHeight);
-    return () => window.removeEventListener("resize", updateHeight);
-  }, [children]);
-
   return (
-    <div className="p-3 sm:p-4">
-      
-      {/* Title */}
-      <h2 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-6">
-        {title}
-      </h2>
-
-      {/* Container */}
-      <div
-        className="
-          bg-white 
-          shadow-md sm:shadow-lg 
-          rounded-xl sm:rounded-2xl 
-          p-3 sm:p-6 
-          transition-[height] duration-300
-          flex flex-col
-        "
-        style={{ height }}
-      >
-        <div ref={containerRef}>{children}</div>
+    <section className="flex-1 bg-slate-50 px-4 py-8 sm:px-6 sm:py-12">
+      <div className="mx-auto w-full max-w-4xl">
+        <header className="mb-6 text-center sm:mb-8">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600">FileFixer tools</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{title}</h1>
+        </header>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-8">
+          {children}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

@@ -57,19 +57,21 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Navbar />
-
-      <Routes>
-        {/* Main pages */}
-        <Route path="/" element={<Home />} />
-        <Route path="*" element={<Home />} />
-        {/* PDF tools are available without an account */}
-        {protectedTools.map((tool) => (
-          <Route key={tool.path} path={tool.path} element={tool.component} />
-        ))}
-      </Routes>
-
-      <Footer />
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex flex-1 flex-col">
+          <Routes>
+            {/* Main pages */}
+            <Route path="/" element={<Home />} />
+            <Route path="*" element={<Home />} />
+            {/* PDF tools are available without an account */}
+            {protectedTools.map((tool) => (
+              <Route key={tool.path} path={tool.path} element={tool.component} />
+            ))}
+          </Routes>
+        </main>
+        <Footer />
+      </div>
     </BrowserRouter>
   );
 }
